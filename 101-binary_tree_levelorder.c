@@ -10,7 +10,6 @@
 linked_list_t *enqueue_node(linked_list_t *tail, binary_tree_t *node)
 {
 	linked_list_t *new_node = malloc(sizeof(*new_node));
-
 	if (!new_node)
 		return (NULL);
 
@@ -62,7 +61,6 @@ void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 	head = malloc(sizeof(*head));
 	if (!head)
 		return;
-
 	head->tree_node = (binary_tree_t *)tree;
 	head->next = NULL;
 	tail = head;
@@ -73,11 +71,10 @@ void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 		func(current->n);
 
 		if (current->left)
-			tail = enqueue_node(tail, current->left);
+			tail = tail ? enqueue_node(tail, current->left) : NULL;
 		if (current->right)
-			tail = enqueue_node(tail, current->right);
+			tail = tail ? enqueue_node(tail, current->right) : NULL;
 
-		
 		if (!head)
 			tail = NULL;
 	}
