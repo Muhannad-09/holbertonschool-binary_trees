@@ -35,33 +35,14 @@ avl_t *avl_remove_simple(avl_t *root)
 }
 
 /**
- * avl_remove - Removes a node from an AVL tree
- * @root: Pointer to the root of the tree
- * @value: Value to remove
+ * avl_rebalance - Rebalances a subtree after deletion
+ * @root: Pointer to the root of subtree
  *
- * Return: Pointer to the new root after deletion
+ * Return: Pointer to the balanced root
  */
-avl_t *avl_remove(avl_t *root, int value)
+avl_t *avl_rebalance(avl_t *root)
 {
-	avl_t *successor;
 	int balance;
-
-	if (!root)
-		return (NULL);
-
-	if (value < root->n)
-		root->left = avl_remove(root->left, value);
-	else if (value > root->n)
-		root->right = avl_remove(root->right, value);
-	else
-	{
-		if (!root->left || !root->right)
-			return (avl_remove_simple(root));
-
-		successor = avl_successor(root->right);
-		root->n = successor->n;
-		root->right = avl_remove(root->right, successor->n);
-	}
 
 	if (!root)
 		return (NULL);
@@ -84,4 +65,35 @@ avl_t *avl_remove(avl_t *root, int value)
 	}
 
 	return (root);
+}
+
+/**
+ * avl_remove - Removes a node from an AVL tree
+ * @root: Pointer to the root of the tree
+ * @value: Value to remove
+ *
+ * Return: Pointer to the new root after deletion
+ */
+avl_t *avl_remove(avl_t *root, int value)
+{
+	avl_t *successor;
+
+	if (!root)
+		return (NULL);
+
+	if (value < root->n)
+		root->left = avl_remove(root->left, value);
+	else if (value > root->n)
+		root->right = avl_remove(root->right, value);
+	else
+	{
+		if (!root->left || !root->right)
+			return (avl_remove_simple(root));
+
+		successor = avl_successor(root->right);
+		root->n = successor->n;
+		root->right = avl_remove(root->right, successor->n);
+	}
+
+	return (avl_rebalance(root));
 }
