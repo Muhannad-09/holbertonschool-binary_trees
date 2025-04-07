@@ -58,7 +58,7 @@ void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 	if (!tree || !func)
 		return;
 
-	/* Enqueue root node */
+	
 	head = malloc(sizeof(*head));
 	if (!head)
 		return;
@@ -76,5 +76,9 @@ void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 			tail = enqueue_node(tail, current->left);
 		if (current->right)
 			tail = enqueue_node(tail, current->right);
+
+		
+		if (!head)
+			tail = NULL;
 	}
 }
