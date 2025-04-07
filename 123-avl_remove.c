@@ -15,6 +15,26 @@ avl_t *avl_successor(avl_t *node)
 }
 
 /**
+ * avl_remove_simple - Removes a node with 0 or 1 children
+ * @root: Pointer to node to remove
+ *
+ * Return: Pointer to new subtree root
+ */
+avl_t *avl_remove_simple(avl_t *root)
+{
+	avl_t *temp = root->left ? root->left : root->right;
+
+	if (!temp)
+	{
+		free(root);
+		return (NULL);
+	}
+	temp->parent = root->parent;
+	free(root);
+	return (temp);
+}
+
+/**
  * avl_remove - Removes a node from an AVL tree
  * @root: Pointer to the root of the tree
  * @value: Value to remove
@@ -36,33 +56,16 @@ avl_t *avl_remove(avl_t *root, int value)
 	else
 	{
 		if (!root->left || !root->right)
-		{
-			avl_t *temp = root->left ? root->left : root->right;
+			return (avl_remove_simple(root));
 
-			if (!temp)
-			{
-				free(root);
-				return (NULL);
-			}
-			else
-			{
-				temp->parent = root->parent;
-				free(root);
-				return (temp);
-			}
-		}
-		else
-		{
-			successor = avl_successor(root->right);
-			root->n = successor->n;
-			root->right = avl_remove(root->right, successor->n);
-		}
+		successor = avl_successor(root->right);
+		root->n = successor->n;
+		root->right = avl_remove(root->right, successor->n);
 	}
 
 	if (!root)
 		return (NULL);
 
-	/* Rebalance */
 	balance = binary_tree_balance(root);
 
 	if (balance > 1 && binary_tree_balance(root->left) >= 0)
