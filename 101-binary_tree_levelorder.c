@@ -1,20 +1,15 @@
 #include "binary_trees.h"
 
 /**
- * enqueue_node - adds a node to the end of a singly linked list
- * @head: a double pointer to the head of the list
- * @node: a pointer to binary_tree_t node
+ * enqueue_node - adds a node to the end of a singly linked list (queue)
+ * @tail: pointer to the current tail of the list
+ * @node: pointer to binary_tree_t node to enqueue
  *
- * Return: nothing
+ * Return: pointer to the new tail node
  */
-linked_list_t *enqueue_node(linked_list_t *head, binary_tree_t *node)
+linked_list_t *enqueue_node(linked_list_t *tail, binary_tree_t *node)
 {
-	linked_list_t *new_node = NULL;
-
-	if (head == NULL)
-		return (NULL);
-
-	new_node = malloc(sizeof(*new_node));
+	linked_list_t *new_node = malloc(sizeof(*new_node));
 
 	if (!new_node)
 		return (NULL);
@@ -22,91 +17,64 @@ linked_list_t *enqueue_node(linked_list_t *head, binary_tree_t *node)
 	new_node->tree_node = node;
 	new_node->next = NULL;
 
-	if (!head->next)
-	{
-		head->next = new_node;
-		return (new_node);
-	}
+	if (tail)
+		tail->next = new_node;
 
-	while (head->next)
-		head = head->next;
-
-	head->next = new_node;
-	return (new_node);
+	return new_node;
 }
 
 /**
- * pop_stack - removes the first node in a linked list
+ * pop_stack - removes the first node in a linked list (queue)
  * @head: a double pointer to the start of the list
  *
- * Return: a pointer to binary_tree_t node held in the 'popped' node
+ * Return: pointer to binary_tree_t node held in the popped node
  */
 binary_tree_t *pop_stack(linked_list_t **head)
 {
 	binary_tree_t *ptr;
 	linked_list_t *temp;
 
-	if (!head || !(*head))
+	if (!head || !*head)
 		return (NULL);
 
 	ptr = (*head)->tree_node;
-
-	if ((*head)->next)
-	{
-		temp = (*head)->next;
-		free(*head);
-		*head = temp;
-	}
-	else
-	{
-		free(*head);
-		*head = NULL;
-	}
+	temp = (*head)->next;
+	free(*head);
+	*head = temp;
 
 	return (ptr);
 }
 
 /**
- * binary_tree_levelorder - prints a binary tree one level at a time
- * @tree: a pointer to the root
- * @func: a pointer to a function for each tree node
- *
- * Return: nothing
+ * binary_tree_levelorder - goes through a binary tree using level-order traversal
+ * @tree: pointer to the root node of the tree
+ * @func: pointer to a function to call for each node
  */
 void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 {
-	linked_list_t **head = NULL;
-	linked_list_t *new_node;
-	binary_tree_t *next_node;
+	linked_list_t *head = NULL, *tail = NULL;
+	binary_tree_t *current;
 
-	new_node = malloc(sizeof(*new_node));
-
-	if (!new_node)
+	if (!tree || !func)
 		return;
 
-	new_node->tree_node = (binary_tree_t *)tree;
-	new_node->next = NULL;
-	head = &new_node;
+	/* Enqueue root node */
+	head = malloc(sizeof(*head));
+	if (!head)
+		return;
 
-	if (tree->left)
-		if (!enqueue_node(*head, tree->left))
-			return;
-	if (tree->right)
-		if (!enqueue_node(*head, tree->right))
-			return;
+	head->tree_node = (binary_tree_t *)tree;
+	head->next = NULL;
+	tail = head;
 
-	while (*head)
+	while (head)
 	{
-		next_node = pop_stack(head);
-		func(next_node->n);
-		if (!*head)
-			break;
-		next_node = (*head)->tree_node;
-		if (next_node->left)
-			if (!enqueue_node(*head, next_node->left))
-				return;
-		if (next_node->right)
-			if (!enqueue_node(*head, next_node->right))
-				return;
+		current = pop_stack(&head);
+		func(current->n);
+
+		if (current->left)
+			tail = enqueue_node(tail, current->left);
+		if (current->right)
+			tail = enqueue_node(tail, current->right);
 	}
 }
