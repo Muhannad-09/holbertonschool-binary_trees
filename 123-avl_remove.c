@@ -3,23 +3,23 @@
 
 /**
  * avl_successor - Finds the in-order successor
- * @node: Pointer to the root
- * Return: Pointer to successor
+ * @node: Pointer to the root of right subtree
+ *
+ * Return: Pointer to the successor node
  */
 avl_t *avl_successor(avl_t *node)
 {
-	avl_t *current = node;
-
-	while (current && current->left)
-		current = current->left;
-	return (current);
+	while (node && node->left)
+		node = node->left;
+	return (node);
 }
 
 /**
- * avl_remove_node - Removes a node from the AVL tree
- * @root: Pointer to root
+ * avl_remove - Removes a node from an AVL tree
+ * @root: Pointer to the root of the tree
  * @value: Value to remove
- * Return: New root after deletion and balancing
+ *
+ * Return: Pointer to the new root after deletion
  */
 avl_t *avl_remove(avl_t *root, int value)
 {
@@ -41,14 +41,15 @@ avl_t *avl_remove(avl_t *root, int value)
 
 			if (!temp)
 			{
-				temp = root;
-				root = NULL;
+				free(root);
+				return (NULL);
 			}
 			else
 			{
-				*root = *temp;
+				temp->parent = root->parent;
+				free(root);
+				return (temp);
 			}
-			free(temp);
 		}
 		else
 		{
@@ -61,7 +62,7 @@ avl_t *avl_remove(avl_t *root, int value)
 	if (!root)
 		return (NULL);
 
-	
+	/* Rebalance */
 	balance = binary_tree_balance(root);
 
 	if (balance > 1 && binary_tree_balance(root->left) >= 0)
