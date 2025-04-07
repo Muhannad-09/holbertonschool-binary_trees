@@ -37,6 +37,7 @@ avl_t *avl_insert(avl_t **tree, int value)
 	}
 	else
 	{
+		/* Value already exists */
 		return (*tree);
 	}
 
@@ -63,5 +64,5 @@ avl_t *avl_insert(avl_t **tree, int value)
 		*tree = binary_tree_rotate_left(*tree);
 	}
 
-	return (*tree);
+	return (new_node);
 }
