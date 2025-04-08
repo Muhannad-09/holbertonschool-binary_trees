@@ -13,6 +13,48 @@ size_t binary_tree_size(const binary_tree_t *tree)
 }
 
 /**
+ * get_insertion_parent - finds the parent where new node should be inserted
+ * @root: pointer to root
+ * @size: total nodes + 1 (where to insert)
+ * Return: pointer to parent node
+ */
+heap_t *get_insertion_parent(heap_t *root, size_t size)
+{
+	size_t mask;
+	heap_t *parent = root;
+
+	mask = 1UL << (sizeof(size_t) * 8 - __builtin_clzll(size) - 2);
+	while (mask > 1)
+	{
+		if (size & mask)
+			parent = parent->right;
+		else
+			parent = parent->left;
+		mask >>= 1;
+	}
+	return (parent);
+}
+
+/**
+ * bubble_up - swaps node with parents until heap condition is restored
+ * @node: pointer to inserted node
+ * Return: pointer to final node
+ */
+heap_t *bubble_up(heap_t *node)
+{
+	int tmp;
+
+	while (node->parent && node->n > node->parent->n)
+	{
+		tmp = node->n;
+		node->n = node->parent->n;
+		node->parent->n = tmp;
+		node = node->parent;
+	}
+	return (node);
+}
+
+/**
  * heap_insert - inserts a value into a Max Binary Heap
  * @root: double pointer to root node
  * @value: value to insert
@@ -20,9 +62,8 @@ size_t binary_tree_size(const binary_tree_t *tree)
  */
 heap_t *heap_insert(heap_t **root, int value)
 {
-	size_t size, mask;
+	size_t size;
 	heap_t *parent, *new_node;
-	int temp;
 
 	if (!root)
 		return (NULL);
@@ -34,17 +75,7 @@ heap_t *heap_insert(heap_t **root, int value)
 	}
 
 	size = binary_tree_size(*root) + 1;
-	mask = 1UL << (sizeof(size_t) * 8 - __builtin_clzll(size) - 2);
-	parent = *root;
-
-	while (mask > 1)
-	{
-		if (size & mask)
-			parent = parent->right;
-		else
-			parent = parent->left;
-		mask >>= 1;
-	}
+	parent = get_insertion_parent(*root, size);
 
 	if (size & 1)
 		new_node = parent->right = binary_tree_node(parent, value);
@@ -54,13 +85,5 @@ heap_t *heap_insert(heap_t **root, int value)
 	if (!new_node)
 		return (NULL);
 
-	while (new_node->parent && new_node->n > new_node->parent->n)
-	{
-		temp = new_node->n;
-		new_node->n = new_node->parent->n;
-		new_node->parent->n = temp;
-		new_node = new_node->parent;
-	}
-
-	return (new_node);
+	return (bubble_up(new_node));
 }
