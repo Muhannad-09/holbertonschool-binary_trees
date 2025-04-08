@@ -1,50 +1,44 @@
 #include "binary_trees.h"
 
 /**
- * sorted_array_to_avl - builds an AVL tree from an array
- * @array: a pointer to the first element of the array to be converted
- * @size: number of elements in the array
+ * build_avl - Helper function to build AVL from sorted array
+ * @array: Pointer to the first element of the array
+ * @start: Start index
+ * @end: End index
+ * @parent: Pointer to parent node
  *
- * Return: a pointer to the root node of the created AVL tree
- *         NULL on failure
+ * Return: Pointer to the created AVL node
  */
-avl_t *sorted_array_to_avl(int *array, size_t size)
+static avl_t *build_avl(int *array, int start, int end, avl_t *parent)
 {
-	avl_t *tree = NULL;
-	size_t middle;
+	int mid;
+	avl_t *node;
 
-	if (!array)
+	if (start > end)
 		return (NULL);
-	middle = (size - 1) / 2;
-	tree = binary_tree_node(NULL, array[middle]);
 
-	sata_helper(&tree, array, -1, middle);
-	sata_helper(&tree, array, middle, size);
+	mid = (start + end) / 2;
+	node = binary_tree_node(parent, array[mid]);
+	if (!node)
+		return (NULL);
 
-	return (tree);
+	node->left = build_avl(array, start, mid - 1, node);
+	node->right = build_avl(array, mid + 1, end, node);
+
+	return (node);
 }
 
 /**
- * sata_helper - helper that builds an AVL tree from an array
- * @root: double pointer to the root node of the subtree
- * @array: a pointer to the first element of the array to be converted
- * @lo: lower bound index
- * @hi: upper bound index
+ * sorted_array_to_avl - Builds an AVL tree from a sorted array
+ * @array: Pointer to the first element of the array
+ * @size: Number of elements in the array
+ *
+ * Return: Pointer to the root node of the created AVL tree, or NULL on failure
  */
-void sata_helper(avl_t **root, int *array, size_t lo, size_t hi)
+avl_t *sorted_array_to_avl(int *array, size_t size)
 {
-	avl_t *new = NULL;
-	size_t middle;
+	if (!array || size == 0)
+		return (NULL);
 
-	if (hi - lo > 1)
-	{
-		middle = (hi - lo) / 2 + lo;
-		new = binary_tree_node(*root, array[middle]);
-		if (array[middle] > (*root)->n)
-			(*root)->right = new;
-		else if (array[middle] < (*root)->n)
-			(*root)->left = new;
-		sata_helper(&new, array, lo, middle);
-		sata_helper(&new, array, middle, hi);
-	}
+	return (build_avl(array, 0, (int)size - 1, NULL));
 }
